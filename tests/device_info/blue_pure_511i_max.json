@@ -1,0 +1,369 @@
+{
+  "appConfig": {},
+  "identityconfig": {},
+  "deviceInfo": [
+    {
+      "id": "a1b2c3d4-e5f6-7890-abcd-ef1234567890",
+      "configuration": {
+        "df": {
+          "a": 877,
+          "ot": "B4Filter",
+          "fsfc": 7000000,
+          "alg": "FilterAlg1"
+        },
+        "di": {
+          "cfv": "0.0.4",
+          "cma": "04:83:08:00:00:00",
+          "mt": "6",
+          "name": "Living Room Filter",
+          "sku": "112637",
+          "mfv": "0.0.4",
+          "ofv": "0.0.4",
+          "hw": "nb_l_1.0",
+          "ds": "112637001234567890123456"
+        },
+        "_ot": "CmConfig",
+        "_f": false,
+        "_it": "urn:blueair:openapi:version:blue:0.0.5",
+        "_eid": "00000000-0000-0000-0000-000000000001",
+        "_sc": "Instance",
+        "ds": {
+          "fu0": {
+            "tf": "senml+json",
+            "ot": "FU",
+            "e": true,
+            "i": 0,
+            "tn": "d/a1b2c3d4-e5f6-7890-abcd-ef1234567890/s/fu0",
+            "ttl": -1,
+            "n": "fu0",
+            "fe": true
+          },
+          "rssi": {
+            "tf": "senml+json",
+            "ot": "RSSI",
+            "e": false,
+            "i": 60000,
+            "tn": "d/a1b2c3d4-e5f6-7890-abcd-ef1234567890/s/rssi",
+            "ttl": 600,
+            "n": "rssi",
+            "fe": true
+          },
+          "ledb": {
+            "tf": "senml+json",
+            "ot": "Led",
+            "e": true,
+            "i": 0,
+            "tn": "d/a1b2c3d4-e5f6-7890-abcd-ef1234567890/s/ledb",
+            "ttl": -1,
+            "n": "ledb",
+            "fe": true
+          },
+          "chl": {
+            "tf": "senml+json",
+            "ot": "ChildLock",
+            "e": true,
+            "i": 0,
+            "tn": "d/a1b2c3d4-e5f6-7890-abcd-ef1234567890/s/chl",
+            "ttl": -1,
+            "n": "chl",
+            "fe": true
+          },
+          "is": {
+            "tf": "senml+json",
+            "ot": "IonizerState",
+            "e": true,
+            "i": 0,
+            "tn": "d/a1b2c3d4-e5f6-7890-abcd-ef1234567890/s/is",
+            "ttl": -1,
+            "n": "is",
+            "fe": true
+          },
+          "am": {
+            "tf": "senml+json",
+            "ot": "AutoMode",
+            "e": true,
+            "i": 0,
+            "tn": "d/a1b2c3d4-e5f6-7890-abcd-ef1234567890/s/am",
+            "ttl": -1,
+            "n": "am",
+            "fe": true
+          },
+          "sb": {
+            "tf": "senml+json",
+            "ot": "Standby",
+            "e": true,
+            "i": 0,
+            "tn": "d/a1b2c3d4-e5f6-7890-abcd-ef1234567890/s/sb",
+            "ttl": -1,
+            "n": "sb",
+            "fe": true
+          },
+          "rt5m": {
+            "tf": "senml+json",
+            "ot": "RT5m",
+            "e": false,
+            "i": 300000,
+            "tn": "d/a1b2c3d4-e5f6-7890-abcd-ef1234567890/s/5m",
+            "sn": ["pm2_5"],
+            "ttl": 1200,
+            "n": "rt5m",
+            "fe": true
+          },
+          "rt1s": {
+            "tf": "senml+json",
+            "ot": "RT1s",
+            "e": false,
+            "i": 1000,
+            "tn": "d/a1b2c3d4-e5f6-7890-abcd-ef1234567890/s/1s",
+            "sn": ["fsp0", "pm2_5"],
+            "ttl": 0,
+            "n": "rt1s",
+            "fe": true
+          },
+          "rt5s": {
+            "tf": "senml+json",
+            "ot": "RT5s",
+            "e": false,
+            "i": 5000,
+            "tn": "d/a1b2c3d4-e5f6-7890-abcd-ef1234567890/s/5s",
+            "sn": ["pm2_5"],
+            "ttl": 1200,
+            "n": "rt5s",
+            "fe": true
+          },
+          "pm2_5": {
+            "tf": "senml+json",
+            "ot": "PM2_5",
+            "e": false,
+            "i": 60000,
+            "tn": "d/a1b2c3d4-e5f6-7890-abcd-ef1234567890/s/pm2_5",
+            "ttl": 1200,
+            "n": "pm2_5",
+            "fe": true
+          },
+          "b5m": {
+            "tf": "senml+json",
+            "th": ["5kb", "4h"],
+            "ot": "Batch5m",
+            "e": true,
+            "i": 300000,
+            "tn": "$aws/rules/telemetry_ingest_rule/d/a1b2c3d4-e5f6-7890-abcd-ef1234567890/s/batch/b5m",
+            "sn": ["pm2_5", "fsp0"],
+            "ttl": -1,
+            "n": "b5m",
+            "fe": true
+          },
+          "sp": {
+            "tf": "senml+json",
+            "ot": "SensorBoxPresense",
+            "e": true,
+            "i": 0,
+            "tn": "d/a1b2c3d4-e5f6-7890-abcd-ef1234567890/s/sp",
+            "ttl": -1,
+            "n": "sp",
+            "fe": true
+          },
+          "fsp0": {
+            "st": "fsp0",
+            "tf": "senml+json",
+            "t": 10,
+            "ot": "Fanspeed",
+            "e": true,
+            "i": 0,
+            "tn": "d/a1b2c3d4-e5f6-7890-abcd-ef1234567890/s/fsp0",
+            "sn": ["fsp0"],
+            "ttl": -1,
+            "n": "fsp0",
+            "fe": true
+          },
+          "nm": {
+            "tf": "senml+json",
+            "ot": "NightMode",
+            "e": true,
+            "i": 0,
+            "tn": "d/a1b2c3d4-e5f6-7890-abcd-ef1234567890/s/nm",
+            "ttl": -1,
+            "n": "nm",
+            "fe": true
+          }
+        },
+        "_r": "us-east-2",
+        "_s": {
+          "sig": "0000000000000000000000000000000000000000000000000000000000000000",
+          "salg": "SHA256"
+        },
+        "_t": "State",
+        "_v": 1752183214,
+        "_cas": 1752182937,
+        "_id": "a1b2c3d4-e5f6-7890-abcd-ef1234567890",
+        "fc": {
+          "pwd": "FactoryPassword",
+          "ssid": "BAFactory",
+          "url": " "
+        },
+        "da": {
+          "reboot": {
+            "p": true,
+            "a": false,
+            "ot": "Reboot",
+            "e": true,
+            "tn": "d/a1b2c3d4-e5f6-7890-abcd-ef1234567890/a/reboot",
+            "n": "reboot",
+            "fe": true
+          },
+          "fu0": {
+            "p": true,
+            "st": "fu0",
+            "a": 0,
+            "tf": "senml+json",
+            "ot": "filterusage",
+            "e": true,
+            "tn": "d/a1b2c3d4-e5f6-7890-abcd-ef1234567890/a/fu0",
+            "n": "fu0",
+            "fe": true
+          },
+          "uitest": {
+            "p": false,
+            "a": "off",
+            "ot": "UiTest",
+            "e": true,
+            "tn": "d/a1b2c3d4-e5f6-7890-abcd-ef1234567890/a/uitest",
+            "n": "uitest",
+            "fe": true
+          },
+          "ledb": {
+            "p": true,
+            "a": 100,
+            "tf": "senml+json",
+            "ot": "LedBrightness",
+            "e": true,
+            "tn": "d/a1b2c3d4-e5f6-7890-abcd-ef1234567890/a/ledb",
+            "n": "ledb",
+            "fe": true
+          },
+          "chl": {
+            "p": true,
+            "a": false,
+            "tf": "senml+json",
+            "ot": "ChildLock",
+            "e": true,
+            "tn": "d/a1b2c3d4-e5f6-7890-abcd-ef1234567890/a/chl",
+            "n": "chl",
+            "fe": true
+          },
+          "sflu": {
+            "p": false,
+            "a": false,
+            "ot": "SensorFlush",
+            "e": true,
+            "tn": "d/a1b2c3d4-e5f6-7890-abcd-ef1234567890/a/sflu",
+            "n": "sflu",
+            "fe": true
+          },
+          "buttontest": {
+            "p": false,
+            "a": false,
+            "ot": "ButtonTest",
+            "e": true,
+            "tn": "d/a1b2c3d4-e5f6-7890-abcd-ef1234567890/a/buttontest",
+            "n": "buttontest",
+            "fe": true
+          },
+          "is": {
+            "p": false,
+            "a": false,
+            "tf": "senml+json",
+            "ot": "IonizerState",
+            "e": true,
+            "tn": "d/a1b2c3d4-e5f6-7890-abcd-ef1234567890/a/is",
+            "n": "is",
+            "fe": true
+          },
+          "am": {
+            "p": true,
+            "a": false,
+            "tf": "senml+json",
+            "ot": "AutoMode",
+            "e": true,
+            "tn": "d/a1b2c3d4-e5f6-7890-abcd-ef1234567890/a/am",
+            "n": "am",
+            "fe": true
+          },
+          "fsp0": {
+            "p": true,
+            "st": "fsp0",
+            "a": 11,
+            "tf": "senml+json",
+            "ot": "Fanspeed",
+            "e": true,
+            "tn": "d/a1b2c3d4-e5f6-7890-abcd-ef1234567890/a/fsp0",
+            "n": "fsp0",
+            "fe": true
+          },
+          "sb": {
+            "p": true,
+            "a": false,
+            "tf": "senml+json",
+            "sbt": "sensor_on",
+            "ot": "Standby",
+            "e": true,
+            "tn": "d/a1b2c3d4-e5f6-7890-abcd-ef1234567890/a/sb",
+            "n": "sb",
+            "fe": true
+          },
+          "nm": {
+            "p": true,
+            "maxfsp": 23,
+            "a": false,
+            "tf": "senml+json",
+            "ot": "NightMode",
+            "ledb": 12,
+            "e": true,
+            "tn": "d/a1b2c3d4-e5f6-7890-abcd-ef1234567890/a/nm",
+            "n": "nm",
+            "fe": true
+          }
+        },
+        "dc": {
+          "cfv": {"d": "di.cfv", "t": "integer", "v": 0, "n": "cfv"},
+          "filterusage": {"a": "fu0", "s": "fu0", "t": "integer", "v": 0, "n": "filterusage"},
+          "brightness": {"a": "ledb", "s": "ledb", "t": "integer", "v": 100, "n": "brightness"},
+          "standby": {"a": "sb", "s": "sb", "t": "boolean", "v": false, "n": "standby"},
+          "fanspeed": {"a": "fsp0", "s": "fsp0", "t": "integer", "v": 11, "n": "fanspeed"},
+          "nightmode": {"a": "nm", "s": "nm", "t": "boolean", "v": false, "n": "nightmode"},
+          "childlock": {"a": "chl", "s": "chl", "t": "boolean", "v": false, "n": "childlock"},
+          "mfv": {"d": "di.mfv", "t": "integer", "v": 0, "n": "mfv"},
+          "ofv": {"d": "di.ofv", "t": "integer", "v": 0, "n": "ofv"},
+          "automode": {"a": "am", "s": "am", "t": "boolean", "v": false, "n": "automode"}
+        }
+      },
+      "alarms": [],
+      "events": [],
+      "sensordata": [],
+      "states": [
+        {"n": "cfv", "v": 4, "t": 1776455065},
+        {"n": "filterusage", "v": 15, "t": 1776455065},
+        {"n": "brightness", "v": 45, "t": 1776455065},
+        {"n": "standby", "vb": false, "t": 1776455065},
+        {"n": "nightmode", "vb": false, "t": 1776455065},
+        {"n": "childlock", "vb": false, "t": 1776455065},
+        {"n": "mfv", "v": 4, "t": 1776455065},
+        {"n": "ofv", "v": 4, "t": 1776455065},
+        {"n": "automode", "vb": true, "t": 1776455065},
+        {"n": "fanspeed", "v": 11, "t": 1776455065},
+        {"t": 1776455065, "vb": true, "n": "online"}
+      ],
+      "welcomehome": {
+        "setting": {
+          "lng": 0.0,
+          "textValue": "123 Example St",
+          "radius": 3000,
+          "lat": 0.0
+        }
+      },
+      "fleet_info": [],
+      "location_id": "",
+      "timezone": "America/New_York"
+    }
+  ]
+}
