@@ -295,3 +295,101 @@ class HttpAwsBlueair:
         )
         response_text = await response.text()
         return response_text == "Success"
+
+    # ------------------------------------------------------------------
+    # Consumable reset
+    # ------------------------------------------------------------------
+    # The cloud exposes a dedicated endpoint to reset a consumable's life
+    # counter (filter / wick / refresher). The endpoint is *not* a shadow
+    # write — it's a cloud REST call whose response carries a status code,
+    # and on success the cloud later pushes a shadow update that drops the
+    # corresponding `*usage` slug back to 0.
+    #
+    # Endpoint and payload shape were derived by inspecting the Blueair
+    # cloud API responses observed during normal app operation.
+
+    #: Valid `ctype` values accepted by ``reset_consumable``.
+    VALID_CONSUMABLE_TYPES: tuple[str, ...] = ("filter", "wick", "refresher")
+
+    #: Cloud response status codes for ``reset_consumable``.
+    RESET_STATUS_SUCCESS: int = 0
+    RESET_STATUS_DEVICE_OFFLINE: int = 3
+
+    @request_with_active_session
+    async def reset_consumable(
+        self, device_uuid: str, ctype: str = "filter"
+    ) -> dict[str, Any]:
+        """Reset a consumable's life counter for a device.
+
+        Args:
+            device_uuid: The device's cloud UUID (same value used in MQTT
+                topics and ``device_info`` calls).
+            ctype: One of ``"filter"``, ``"wick"``, ``"refresher"``.
+
+        Returns:
+            The parsed JSON response body. The caller should inspect the
+            ``status`` field (see ``RESET_STATUS_*``); non-zero means the
+            cloud could not deliver the reset (e.g. device offline).
+
+        Raises:
+            ValueError: If ``ctype`` is not in :data:`VALID_CONSUMABLE_TYPES`.
+            LoginError / SessionError: Propagated from the shared request
+                decorators if authentication fails.
+        """
+        if ctype not in self.VALID_CONSUMABLE_TYPES:
+            raise ValueError(
+                f"invalid ctype {ctype!r}; expected one of "
+                f"{self.VALID_CONSUMABLE_TYPES}"
+            )
+        _LOGGER.debug(
+            "reset_consumable: device_uuid=%s ctype=%s", device_uuid, ctype
+        )
+        url = (
+            f"https://{AWS_APIKEYS[self.region]['restApiId']}"
+            f".execute-api.{AWS_APIKEYS[self.region]['awsRegion']}"
+            f"/prod/c/consumable/direct-reset"
+        )
+        headers = {
+            "Authorization": f"Bearer {await self.get_access_token()}",
+        }
+        json_body = {"deviceid": device_uuid, "ctype": ctype}
+        response: ClientResponse = (
+            await self._post_request_with_logging_and_errors_raised(
+                url=url, headers=headers, json_body=json_body
+            )
+        )
+        try:
+            response_json = await response.json(content_type=None)
+        except Exception as exc:
+            response_text = await response.text()
+            _LOGGER.warning(
+                "reset_consumable: failed to parse JSON for "
+                "device_uuid=%s ctype=%s: %s; raw=%r",
+                device_uuid, ctype, exc, response_text,
+            )
+            return {"status": -1, "raw": response_text}
+        if not isinstance(response_json, dict):
+            _LOGGER.warning(
+                "reset_consumable: unexpected non-dict response for "
+                "device_uuid=%s ctype=%s: %r",
+                device_uuid, ctype, response_json,
+            )
+            return {"status": -1, "raw": response_json}
+        status = response_json.get("status")
+        if status == self.RESET_STATUS_SUCCESS:
+            _LOGGER.debug(
+                "reset_consumable: success device_uuid=%s ctype=%s",
+                device_uuid, ctype,
+            )
+        elif status == self.RESET_STATUS_DEVICE_OFFLINE:
+            _LOGGER.warning(
+                "reset_consumable: device offline device_uuid=%s ctype=%s",
+                device_uuid, ctype,
+            )
+        else:
+            _LOGGER.warning(
+                "reset_consumable: cloud reported failure status=%s "
+                "device_uuid=%s ctype=%s body=%s",
+                status, device_uuid, ctype, response_json,
+            )
+        return response_json

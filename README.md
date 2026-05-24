@@ -16,6 +16,7 @@ a lot of this is based on [hass-blueair](https://github.com/aijayadams/hass-blue
 - **Automatic reconnect with credential refresh** — MQTT tokens expire after 24 hours; the client refreshes credentials and reconnects with exponential backoff (5s → 300s max) on unexpected disconnects
 - **Data-driven SKU mapping** — resolves 418+ device SKUs to human-readable product names (e.g., `111582` → "Blueair Blue Pure 511i Max") via a built-in lookup table
 - **Per-device hardware detection** — `mood_brightness_max` and `fan_speed_count` adapt automatically based on the device's hardware identifier
+- **Consumable life resets** — `DeviceAws.reset_filter()` / `reset_wick()` / `reset_refresher()` issue the cloud-side reset after a physical part replacement; see [docs/consumable-reset.md](docs/consumable-reset.md)
 
 ***
 

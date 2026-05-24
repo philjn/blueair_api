@@ -1652,3 +1652,85 @@ class MiniRestfulSetterTest(DeviceAwsTestBase):
         await self.device.refresh()
         assert self.device.hour_format is False
 
+
+class DeviceAwsResetConsumableTest(DeviceAwsTestBase):
+    """Tests for the reset_consumable / reset_filter / reset_wick / reset_refresher methods.
+
+    The HTTP layer is mocked at the api object level; we verify that
+    DeviceAws forwards the uuid + ctype correctly and translates the
+    cloud's status field into a clean bool.
+    """
+
+    async def _set_reset_response(self, response: dict):
+        async def fake_reset(device_uuid, ctype):
+            self._last_reset_call = (device_uuid, ctype)
+            return response
+        self._last_reset_call = None
+        self.api.reset_consumable.side_effect = fake_reset
+
+    async def test_reset_consumable_success(self):
+        await self._set_reset_response({"status": 0})
+        result = await self.device.reset_consumable("filter")
+        assert result is True
+        assert self._last_reset_call == ("fake-uuid", "filter")
+
+    async def test_reset_consumable_device_offline_returns_false(self):
+        await self._set_reset_response({"status": 3, "msg": "offline"})
+        result = await self.device.reset_consumable("filter")
+        assert result is False
+
+    async def test_reset_consumable_generic_failure_returns_false(self):
+        await self._set_reset_response({"status": 7})
+        result = await self.device.reset_consumable("filter")
+        assert result is False
+
+    async def test_reset_consumable_handles_non_dict_response(self):
+        # The HTTP layer wraps unexpected shapes as {"status": -1, "raw": ...}
+        # but defensively, DeviceAws shouldn't blow up if a future
+        # HTTP-layer change ever yields a non-dict.
+        async def fake_reset(device_uuid, ctype):
+            return None
+        self.api.reset_consumable.side_effect = fake_reset
+        result = await self.device.reset_consumable("filter")
+        assert result is False
+
+    async def test_reset_filter_uses_filter_ctype(self):
+        await self._set_reset_response({"status": 0})
+        await self.device.reset_filter()
+        assert self._last_reset_call == ("fake-uuid", "filter")
+
+    async def test_reset_wick_uses_wick_ctype(self):
+        await self._set_reset_response({"status": 0})
+        await self.device.reset_wick()
+        assert self._last_reset_call == ("fake-uuid", "wick")
+
+    async def test_reset_refresher_uses_refresher_ctype(self):
+        await self._set_reset_response({"status": 0})
+        await self.device.reset_refresher()
+        assert self._last_reset_call == ("fake-uuid", "refresher")
+
+    async def test_reset_consumable_propagates_value_error_from_http_layer(self):
+        # The HTTP layer raises ValueError for unknown ctype; we want that
+        # to surface to callers (e.g. HA button) rather than be swallowed.
+        async def fake_reset(device_uuid, ctype):
+            raise ValueError(f"invalid ctype {ctype!r}")
+        self.api.reset_consumable.side_effect = fake_reset
+        with pytest.raises(ValueError):
+            await self.device.reset_consumable("carbon")
+
+    async def test_reset_consumable_does_not_mutate_local_usage_percentage(self):
+        # We intentionally do NOT optimistically zero the *_usage_percentage
+        # attributes — that lets the shadow update drive the value.
+        self.device.filter_usage_percentage = 87
+        await self._set_reset_response({"status": 0})
+        await self.device.reset_filter()
+        assert self.device.filter_usage_percentage == 87
+
+    async def test_reset_consumable_raises_when_uuid_is_none(self):
+        self.device.uuid = None
+        await self._set_reset_response({"status": 0})
+        with pytest.raises(RuntimeError, match="uuid"):
+            await self.device.reset_filter()
+        # No HTTP call should have been issued.
+        assert self._last_reset_call is None
+

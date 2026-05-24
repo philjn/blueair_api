@@ -574,6 +574,68 @@ class DeviceAws(CallbacksMixin):
         await self.api.set_device_info(self.uuid, "hourformat", "vb", value)
         self.publish_updates()
 
+    # ------------------------------------------------------------------
+    # Consumable resets (filter / wick / refresher)
+    # ------------------------------------------------------------------
+    # These are cloud REST calls, not shadow writes; on success the cloud
+    # subsequently pushes a shadow update that drops the corresponding
+    # `*usage` slug to 0 — which arrives via the normal MQTT path and
+    # updates ``filter_usage_percentage`` / ``wick_usage_percentage`` /
+    # ``water_refresher_usage_percentage``.
+    #
+    # We do NOT optimistically zero those attributes here, because if the
+    # cloud reports failure (e.g. device offline) the UI would silently
+    # show "100% remaining" until the next refresh. Letting the shadow
+    # update drive the value keeps the displayed life accurate at all
+    # times.
+
+    async def reset_consumable(self, ctype: str) -> bool:
+        """Reset a consumable's life counter via the cloud REST endpoint.
+
+        Args:
+            ctype: One of ``"filter"``, ``"wick"``, ``"refresher"``.
+
+        Returns:
+            ``True`` if the cloud accepted the reset (status == 0).
+            ``False`` if the cloud rejected it (e.g. device offline,
+            unknown ctype on this SKU, transient backend failure).
+
+        Raises:
+            ValueError: If ``ctype`` is not a known consumable type.
+
+        Notes:
+            Auth / transport failures (``LoginError`` / ``SessionError``
+            / ``aiohttp.ClientError``) are propagated from the HTTP layer
+            so callers (e.g. an HA button entity) can surface them as
+            user-visible errors.
+        """
+        if self.uuid is None:
+            # Defensive: should never happen for a properly-constructed
+            # DeviceAws, but raising a clear error beats a confusing
+            # downstream TypeError from the HTTP layer.
+            raise RuntimeError(
+                "reset_consumable called on a DeviceAws with no uuid"
+            )
+        _LOGGER.debug(
+            "reset_consumable: device=%s (uuid=%s) ctype=%s",
+            self.name_api, self.uuid, ctype,
+        )
+        response = await self.api.reset_consumable(self.uuid, ctype)
+        status = response.get("status") if isinstance(response, dict) else None
+        return status == 0
+
+    async def reset_filter(self) -> bool:
+        """Reset the particulate filter life counter (``ctype=filter``)."""
+        return await self.reset_consumable("filter")
+
+    async def reset_wick(self) -> bool:
+        """Reset the humidifier wick life counter (``ctype=wick``)."""
+        return await self.reset_consumable("wick")
+
+    async def reset_refresher(self) -> bool:
+        """Reset the water refresher life counter (``ctype=refresher``)."""
+        return await self.reset_consumable("refresher")
+
     @property
     def model_name(self) -> str:
         """Human-readable product name derived from SKU lookup."""
