@@ -469,6 +469,82 @@ class DeviceAws(CallbacksMixin):
             return 4
         return 100
 
+    @property
+    def supports_filter_reset_online(self) -> bool:
+        """Whether the cloud REST consumable-reset path actually resets
+        the device's life counter on this model.
+
+        Background — investigation of the Blueair cloud API responses and
+        AWS IoT protocol behavior confirms that two reset paths exist:
+
+        1. **Online (cloud-driven)** — POST /c/consumable/direct-reset.
+           The cloud accepts the request and forwards a reset command to
+           the device firmware. The device then publishes a shadow
+           update with the corresponding `*usage` slug set to 0.
+           Supported on newer device families.
+
+        2. **Manual (on-device)** — the user must hold a physical
+           button on the device for ~15 seconds. The firmware zeroes
+           the counter locally and publishes the shadow update. The
+           cloud REST endpoint, if called for these models, returns
+           `status: 0` but the device firmware ignores it. Confirmed
+           empirically by capturing shadow traffic from a B4-family
+           device (`hw="nb_h_1.0"`): the REST call had no effect;
+           only the physical-button press updated the shadow.
+
+        The decision mirrors the gate used by the official cloud client
+        for the same model families. The cloud also publishes a
+        dynamic allowlist (`reset_filter_online` in
+        `c/configs/sku-configurations`) for borderline devices, but
+        that list changes over time; for now we use the conservative
+        static hardware-prefix mapping below. If a device class is
+        *known* to support the online reset we return True; otherwise
+        we return False so callers can surface "press the button on
+        the device" instead of issuing a no-op REST call.
+
+        Hardware-prefix groups that DO support online reset (newer
+        device generations):
+
+        * `hum`, `hum2_`  → Humidifier / Humidifier20 (H35i, H38i,
+          H76i, …)
+        * `cmb3in1`         → Combo3in1 (T10i / T20i)
+        * `cmb2in120`       → Combo2in120
+        * `nc_`             → NewClassic (CP7i, …)
+        * `l_blue40`        → Blue40 / Signature SP4i
+
+        Hardware-prefix groups that do NOT (older generations) and need
+        the physical-button reset on the device:
+
+        * `nb_`             → BluePremium / B4 (e.g. `nb_h_1.0`,
+          empirically confirmed)
+        * `high`            → Highend (older Premium hardware)
+
+        Unknown prefixes return False — preferring a missing button
+        over one that silently no-ops. Add new prefixes here when
+        they're observed to honor the cloud reset on real hardware.
+        """
+        hw = self.hw if isinstance(self.hw, str) else ""
+        if not hw:
+            return False
+        # Known supported prefixes (ordered most-specific first so the
+        # broader `cmb3in1` / `hum` etc. don't shadow them).
+        if hw.startswith("cmb2in120"):
+            return True
+        if hw.startswith("cmb3in1"):
+            return True
+        if hw.startswith("l_blue40"):
+            return True
+        if hw.startswith("nc_"):
+            return True
+        if hw.startswith("hum"):  # covers hum, hum2_, etc.
+            return True
+        # Known unsupported prefixes — listed explicitly for clarity
+        # even though the default-False branch below would catch them.
+        if hw.startswith("nb_") or hw.startswith("high"):
+            return False
+        # Conservative default: assume manual-reset only.
+        return False
+
     async def set_fan_speed(self, value: int):
         self.fan_speed = value
         if self._is_humidifier:

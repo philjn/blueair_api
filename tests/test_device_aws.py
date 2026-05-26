@@ -1734,3 +1734,80 @@ class DeviceAwsResetConsumableTest(DeviceAwsTestBase):
         # No HTTP call should have been issued.
         assert self._last_reset_call is None
 
+
+class DeviceAwsSupportsFilterResetOnlineTest(DeviceAwsTestBase):
+    """Tests for the `supports_filter_reset_online` hardware-prefix gate.
+
+    The Android cloud client gates the online (cloud-driven) reset path
+    behind a per-device check. We mirror that gate using a static
+    hardware-prefix mapping derived from the `DeviceType` enum in the
+    decompiled cloud client. See the docstring on
+    `DeviceAws.supports_filter_reset_online` for the full rationale.
+    """
+
+    def _set_hw(self, hw):
+        self.device.hw = hw
+
+    def test_b4_family_nb_prefix_is_unsupported(self):
+        # Empirically confirmed: B4-family hw="nb_h_1.0" did NOT honor
+        # the cloud REST reset (shadow filterusage stayed at 97 across
+        # successful API responses; only physical-button reset
+        # actually zeroed the counter).
+        self._set_hw("nb_h_1.0")
+        assert self.device.supports_filter_reset_online is False
+
+    def test_other_nb_prefix_variants_are_unsupported(self):
+        for hw in ("nb_l_1.0", "nb_1.0", "nb_xl"):
+            self._set_hw(hw)
+            assert self.device.supports_filter_reset_online is False, hw
+
+    def test_highend_prefix_is_unsupported(self):
+        self._set_hw("highend_1")
+        assert self.device.supports_filter_reset_online is False
+
+    def test_humidifier_prefix_is_supported(self):
+        for hw in ("hum_1", "hum2_l", "hum2_m"):
+            self._set_hw(hw)
+            assert self.device.supports_filter_reset_online is True, hw
+
+    def test_newclassic_prefix_is_supported(self):
+        # CP7i (nc_6700) and similar new-classic devices.
+        self._set_hw("nc_6700")
+        assert self.device.supports_filter_reset_online is True
+
+    def test_combo3in1_prefix_is_supported(self):
+        # T10i / T20i.
+        for hw in ("cmb3in1_a", "cmb3in1_b"):
+            self._set_hw(hw)
+            assert self.device.supports_filter_reset_online is True, hw
+
+    def test_combo2in120_prefix_is_supported(self):
+        # cmb2in120 must match BEFORE cmb3in1-style sibling prefixes;
+        # this test also locks in the ordering of the if-chain.
+        self._set_hw("cmb2in120_a")
+        assert self.device.supports_filter_reset_online is True
+
+    def test_blue40_signature_prefix_is_supported(self):
+        self._set_hw("l_blue40")
+        assert self.device.supports_filter_reset_online is True
+
+    def test_empty_hw_returns_false(self):
+        self._set_hw("")
+        assert self.device.supports_filter_reset_online is False
+
+    def test_none_hw_returns_false(self):
+        self._set_hw(None)
+        assert self.device.supports_filter_reset_online is False
+
+    def test_notimplemented_hw_returns_false(self):
+        # `hw` is `NotImplemented` for devices that don't report
+        # `configuration.di.hw` — guard explicitly so we don't crash.
+        self._set_hw(NotImplemented)
+        assert self.device.supports_filter_reset_online is False
+
+    def test_unknown_prefix_returns_false_conservatively(self):
+        # Conservative default: an unknown hw prefix yields False so we
+        # never expose a button that silently no-ops. Add prefixes to
+        # the supports_filter_reset_online property as they're observed.
+        self._set_hw("totally_new_family_42")
+        assert self.device.supports_filter_reset_online is False
